@@ -9,7 +9,7 @@ Go to http://localhost:8005 to access the application.
 
 Enjoy !
 
-===
+---
 
 
 # Dashboard
