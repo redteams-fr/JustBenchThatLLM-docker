@@ -36,9 +36,9 @@ List of previous benchmarks:
 
 # Access results 
 
-![Results](img/results_01.jpg)
+![Results](img/result_01.jpg)
 
-![Results](img/results_02.jpg)
+![Results](img/result_02.jpg)
 
-![Results](img/results_03.jpg)
+![Results](img/result_03.jpg)
 
