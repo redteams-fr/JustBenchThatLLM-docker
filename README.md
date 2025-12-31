@@ -12,33 +12,33 @@ Enjoy !
 
 Dashboard:
 
-![Dashboard](img/dashboard_01.png)
+![Dashboard](img/dashboard_01.)
 
 New benchmark:
 
-![New benchmark](img/new_benchmark_01.png)
+![New benchmark](img/new_benchmark_01.jpg)
 
-![New benchmark](img/new_benchmark_02.png)
+![New benchmark](img/new_benchmark_02.jpg)
 
 Use LM Studio to serve models:
 
-![LM Studio](img/lmstudio_01.png)
+![LM Studio](img/lmstudio_01.jpg)
 
 
 Running : 
 
-![Running](img/running_01.png)
+![Running](img/running_01.jpg)
 
 List of previous benchmarks:
 
-![Dashboard](img/dashboard_02.png)
+![Dashboard](img/dashboard_02.jpg)
 
 
 Access results : 
 
-![Results](img/results_01.png)
+![Results](img/results_01.jpg)
 
-![Results](img/results_02.png)
+![Results](img/results_02.jpg)
 
-![Results](img/results_03.png)
+![Results](img/results_03.jpg)
 
