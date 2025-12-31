@@ -10,11 +10,11 @@ Go to http://localhost:8005 to access the application.
 Enjoy !
 
 
-Dashboard:
+# Dashboard
 
 ![Dashboard](img/dashboard_01.)
 
-New benchmark:
+# New benchmark
 
 ![New benchmark](img/new_benchmark_01.jpg)
 
@@ -25,7 +25,7 @@ Use LM Studio to serve models:
 ![LM Studio](img/lmstudio_01.jpg)
 
 
-Running : 
+# Running benchmark
 
 ![Running](img/running_01.jpg)
 
@@ -34,7 +34,7 @@ List of previous benchmarks:
 ![Dashboard](img/dashboard_02.jpg)
 
 
-Access results : 
+# Access results 
 
 ![Results](img/results_01.jpg)
 
