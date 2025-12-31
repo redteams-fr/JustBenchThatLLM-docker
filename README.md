@@ -4,7 +4,7 @@ Benchmark an LLM endpoint without friction !
 
 Visual, reproducible benchmarking for LLM inference endpoints (vLLM, LM Studio, OpenAI-compatible APIs).
 
-*JustBenchThatLLM* lets you run load benchmarks against LLM inference APIs, track execution in real time, and analyze performance metrics such as latency, throughput, TTFT, and percentiles.
+**JustBenchThatLLM** lets you run load benchmarks against LLM inference APIs, track execution in real time, and analyze performance metrics such as latency, throughput, TTFT, and percentiles.
 
 ## Typical use cases
 
