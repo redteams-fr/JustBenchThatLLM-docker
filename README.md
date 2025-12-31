@@ -14,7 +14,7 @@ Enjoy !
 
 # Dashboard
 
-![Dashboard](img/dashboard_01.)
+![Dashboard](img/dashboard_01.jpg)
 
 # New benchmark
 
