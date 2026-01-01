@@ -15,7 +15,7 @@ services:
       retries: 5
 
   mongo:
-    image: mongo:6-jammy
+    image: mongo:8.0
     container_name: mongodb
     ports:
       - "27017:27017"
@@ -29,7 +29,7 @@ services:
       retries: 5
 
   backend:
-    image: redteamsfr/benchmark-backend
+    image: redteamsfr/benchmark-backend:latest
     container_name: benchmark-backend
     ports:
       - "8000:8000"
@@ -49,7 +49,7 @@ services:
     restart: unless-stopped
 
   worker:
-    image: redteamsfr/benchmark-worker
+    image: redteamsfr/benchmark-worker:latest
     container_name: benchmark-worker
     environment:
       - REDIS_URL=redis://redis:6379/0
@@ -65,7 +65,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: redteamsfr/benchmark-frontend
+    image: redteamsfr/benchmark-frontend:latest
     container_name: benchmark-frontend
     ports:
       - "8005:8005"
