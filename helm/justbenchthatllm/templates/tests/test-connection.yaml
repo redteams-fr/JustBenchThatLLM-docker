@@ -1,0 +1,19 @@
+{{- if .Values.backend.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "justbenchthatllm.fullname" . }}-test-connection"
+  labels:
+    {{- include "justbenchthatllm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: test
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+  - name: wget
+    image: busybox:1.35
+    command: ['wget']
+    args: ['{{ include "justbenchthatllm.backend.url" . }}/health']
+  restartPolicy: Never
+{{- end }}
+

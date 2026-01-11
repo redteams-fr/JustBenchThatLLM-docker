@@ -1,0 +1,78 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  mongo:
+    image: mongo:8.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    image: redteamsfr/benchmark-backend:latest
+    container_name: benchmark-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - LOG_LEVEL=INFO
+      - STORAGE_TYPE=mongodb
+      - MONGODB_URL=mongodb://mongodb:27017
+      - MONGODB_DB_NAME=benchmark_db
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      worker:
+        condition: service_started
+    restart: unless-stopped
+
+  worker:
+    image: redteamsfr/benchmark-worker:latest
+    container_name: benchmark-worker
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - LOG_LEVEL=INFO
+      - MONGODB_URL=mongodb://mongodb:27017
+      - MONGODB_DB_NAME=benchmark_db
+      - STORAGE_TYPE=mongodb  
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    image: redteamsfr/benchmark-frontend:latest
+    container_name: benchmark-frontend
+    ports:
+      - "8005:8005"
+    environment:
+      - BACKEND_BASE_URL=http://backend:8000
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  mongo_data:
