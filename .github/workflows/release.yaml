@@ -3,7 +3,7 @@ name: Release Helm Chart
 on:
   push:
     tags:
-      - 'JustBenchThatLLM-*'
+      - 'justbenchthatllm-*'
 
 permissions:
   contents: write
@@ -22,7 +22,7 @@ jobs:
 
       - name: Get version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF_NAME#JustBenchThatLLM-}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_REF_NAME#justbenchthatllm-}" >> $GITHUB_OUTPUT
 
       - name: Update Chart version
         run: |
