@@ -1,0 +1,97 @@
+{{- if .Values.redis.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "justbenchthatllm.fullname" . }}-redis
+  labels:
+    {{- include "justbenchthatllm.redis.labels" . | nindent 4 }}
+  {{- if or .Values.global.annotations .Values.redis.podAnnotations }}
+  annotations:
+    {{- include "justbenchthatllm.redis.annotations" . | nindent 4 }}
+  {{- end }}
+spec:
+  serviceName: {{ include "justbenchthatllm.fullname" . }}-redis-headless
+  replicas: {{ .Values.redis.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "justbenchthatllm.redis.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "justbenchthatllm.redis.selectorLabels" . | nindent 8 }}
+        {{- with .Values.redis.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- if or .Values.global.annotations .Values.redis.podAnnotations }}
+      annotations:
+        {{- include "justbenchthatllm.redis.annotations" . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.pullSecret.create }}
+      imagePullSecrets:
+      - name: {{ include "justbenchthatllm.fullname" . }}-pull-secret
+      {{- end }}
+      {{- with .Values.redis.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.redis.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.redis.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: redis
+        image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+        imagePullPolicy: {{ .Values.redis.image.pullPolicy }}
+        command: {{ .Values.redis.command }}
+        ports:
+        - name: redis
+          containerPort: 6379
+          protocol: TCP
+        {{- if .Values.redis.healthcheck.enabled }}
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: {{ .Values.redis.healthcheck.initialDelaySeconds }}
+          periodSeconds: {{ .Values.redis.healthcheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.redis.healthcheck.timeoutSeconds }}
+          successThreshold: {{ .Values.redis.healthcheck.successThreshold }}
+          failureThreshold: {{ .Values.redis.healthcheck.failureThreshold }}
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: {{ .Values.redis.healthcheck.initialDelaySeconds }}
+          periodSeconds: {{ .Values.redis.healthcheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.redis.healthcheck.timeoutSeconds }}
+          successThreshold: {{ .Values.redis.healthcheck.successThreshold }}
+          failureThreshold: {{ .Values.redis.healthcheck.failureThreshold }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.redis.resources | nindent 10 }}
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+  {{- if .Values.redis.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes:
+        - {{ .Values.redis.persistence.accessMode }}
+      {{- if .Values.redis.persistence.storageClass }}
+      storageClassName: {{ .Values.redis.persistence.storageClass }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.redis.persistence.size }}
+  {{- end }}
+{{- end }}
+

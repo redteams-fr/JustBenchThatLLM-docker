@@ -1,0 +1,98 @@
+{{- if .Values.mongo.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "justbenchthatllm.fullname" . }}-mongo
+  labels:
+    {{- include "justbenchthatllm.mongo.labels" . | nindent 4 }}
+  {{- if or .Values.global.annotations .Values.mongo.podAnnotations }}
+  annotations:
+    {{- include "justbenchthatllm.mongo.annotations" . | nindent 4 }}
+  {{- end }}
+spec:
+  serviceName: {{ include "justbenchthatllm.fullname" . }}-mongo-headless
+  replicas: {{ .Values.mongo.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "justbenchthatllm.mongo.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "justbenchthatllm.mongo.selectorLabels" . | nindent 8 }}
+        {{- with .Values.mongo.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- if or .Values.global.annotations .Values.mongo.podAnnotations }}
+      annotations:
+        {{- include "justbenchthatllm.mongo.annotations" . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.pullSecret.create }}
+      imagePullSecrets:
+      - name: {{ include "justbenchthatllm.fullname" . }}-pull-secret
+      {{- end }}
+      {{- with .Values.mongo.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mongo.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mongo.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: mongo
+        image: "{{ .Values.mongo.image.repository }}:{{ .Values.mongo.image.tag }}"
+        imagePullPolicy: {{ .Values.mongo.image.pullPolicy }}
+        ports:
+        - name: mongo
+          containerPort: 27017
+          protocol: TCP
+        {{- if .Values.mongo.healthcheck.enabled }}
+        livenessProbe:
+          exec:
+            command:
+            - mongosh
+            - --eval
+            - db.adminCommand('ping')
+          initialDelaySeconds: {{ .Values.mongo.healthcheck.initialDelaySeconds }}
+          periodSeconds: {{ .Values.mongo.healthcheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.mongo.healthcheck.timeoutSeconds }}
+          successThreshold: {{ .Values.mongo.healthcheck.successThreshold }}
+          failureThreshold: {{ .Values.mongo.healthcheck.failureThreshold }}
+        readinessProbe:
+          exec:
+            command:
+            - mongosh
+            - --eval
+            - db.adminCommand('ping')
+          initialDelaySeconds: {{ .Values.mongo.healthcheck.initialDelaySeconds }}
+          periodSeconds: {{ .Values.mongo.healthcheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.mongo.healthcheck.timeoutSeconds }}
+          successThreshold: {{ .Values.mongo.healthcheck.successThreshold }}
+          failureThreshold: {{ .Values.mongo.healthcheck.failureThreshold }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.mongo.resources | nindent 10 }}
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /data/db
+  {{- if .Values.mongo.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-data
+    spec:
+      accessModes:
+        - {{ .Values.mongo.persistence.accessMode }}
+      {{- if .Values.mongo.persistence.storageClass }}
+      storageClassName: {{ .Values.mongo.persistence.storageClass }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.mongo.persistence.size }}
+  {{- end }}
+{{- end }}
+

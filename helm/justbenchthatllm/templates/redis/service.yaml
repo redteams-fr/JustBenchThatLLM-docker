@@ -1,0 +1,42 @@
+{{- if .Values.redis.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "justbenchthatllm.fullname" . }}-redis
+  labels:
+    {{- include "justbenchthatllm.redis.labels" . | nindent 4 }}
+  {{- if or .Values.global.annotations .Values.redis.podAnnotations }}
+  annotations:
+    {{- include "justbenchthatllm.redis.annotations" . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.redis.service.type }}
+  ports:
+    - port: {{ .Values.redis.service.port }}
+      targetPort: redis
+      protocol: TCP
+      name: redis
+  selector:
+    {{- include "justbenchthatllm.redis.selectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "justbenchthatllm.fullname" . }}-redis-headless
+  labels:
+    {{- include "justbenchthatllm.redis.labels" . | nindent 4 }}
+  {{- if or .Values.global.annotations .Values.redis.podAnnotations }}
+  annotations:
+    {{- include "justbenchthatllm.redis.annotations" . | nindent 4 }}
+  {{- end }}
+spec:
+  clusterIP: None
+  ports:
+    - port: {{ .Values.redis.service.port }}
+      targetPort: redis
+      protocol: TCP
+      name: redis
+  selector:
+    {{- include "justbenchthatllm.redis.selectorLabels" . | nindent 4 }}
+{{- end }}
+

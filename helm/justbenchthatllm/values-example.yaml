@@ -1,0 +1,162 @@
+# Exemple de fichier values.yaml personnalisé pour JustBenchThatLLM
+# Configuration du pull secret pour les images Docker privées
+pullSecret:
+  create: false
+  username: ""
+  password: ""
+  registry: "docker.io"  
+
+# Labels et annotations globaux appliqués à toutes les ressources
+global:
+  labels:    
+    team: redteamsfr
+  annotations:
+    managed-by: helm
+
+# Configuration Redis avec labels et annotations personnalisés
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: 7-alpine
+  
+  # Labels personnalisés pour les pods Redis
+  podLabels:    
+    component: redis    
+  
+  # Annotations personnalisées pour les pods Redis
+  podAnnotations:
+    prometheus.io/scrape: "false"
+  
+  persistence:
+    enabled: true
+   # storageClass: "fast-ssd"
+    size: 2Gi
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "200m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+# Configuration MongoDB avec labels et annotations personnalisés
+mongo:
+  enabled: true
+  image:
+    repository: mongo
+    tag: 8.0
+  
+  # Labels personnalisés pour les pods MongoDB
+  podLabels:
+    component: mongodb    
+  
+  # Annotations personnalisées pour les pods MongoDB
+  podAnnotations:
+    prometheus.io/scrape: "false"
+  
+  persistence:
+    enabled: true
+   # storageClass: "fast-ssd"
+    size: 2Gi
+  
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+
+# Configuration Backend 
+backend:
+  enabled: true
+  image:
+    repository: redteamsfr/benchmark-backend
+    tag: v1.0.5
+  
+  # Labels personnalisés pour les pods Backend
+  podLabels:
+    component: backend
+  
+  # Annotations personnalisées pour les pods Backend
+  podAnnotations:
+    prometheus.io/scrape: "false"
+  
+  replicaCount: 1
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  
+  env:
+    LOG_LEVEL: DEBUG
+    STORAGE_TYPE: mongodb
+    MONGODB_DB_NAME: benchmark_db
+
+# Configuration Worker 
+worker:
+  enabled: true
+  image:
+    repository: redteamsfr/benchmark-worker
+    tag: v1.0.5
+  
+  # Labels personnalisés pour les pods Worker
+  podLabels:
+    component: worker
+  
+  # Annotations personnalisées pour les pods Worker
+  podAnnotations:
+    prometheus.io/scrape: "false"
+  
+  replicaCount: 1
+  
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+  
+  env:
+    LOG_LEVEL: INFO
+    STORAGE_TYPE: mongodb
+    MONGODB_DB_NAME: benchmark_db
+
+# Configuration Frontend avec labels et annotations personnalisés
+frontend:
+  enabled: true
+  image:
+    repository: redteamsfr/benchmark-frontend
+    tag: v1.0.6
+
+  env:
+    APP_PASSWORD: 123456  
+  
+  # Labels personnalisés pour les pods Frontend
+  podLabels:
+    component: frontend
+  
+  # Annotations personnalisées pour les pods Frontend
+  podAnnotations:
+    prometheus.io/scrape: "false"
+  
+  replicaCount: 1
+  
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  # Configuration Ingress
+  ingress:
+    enabled: false

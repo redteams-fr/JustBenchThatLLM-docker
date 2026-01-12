@@ -1,0 +1,85 @@
+{{- if .Values.frontend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "justbenchthatllm.fullname" . }}-frontend
+  labels:
+    {{- include "justbenchthatllm.frontend.labels" . | nindent 4 }}
+  {{- if or .Values.global.annotations .Values.frontend.podAnnotations }}
+  annotations:
+    {{- include "justbenchthatllm.frontend.annotations" . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "justbenchthatllm.frontend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "justbenchthatllm.frontend.selectorLabels" . | nindent 8 }}
+        {{- with .Values.frontend.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- if or .Values.global.annotations .Values.frontend.podAnnotations }}
+      annotations:
+        {{- include "justbenchthatllm.frontend.annotations" . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.frontend.pullSecret }}
+      imagePullSecrets:
+      - name: {{ .Values.frontend.pullSecret }}
+      {{- end }}
+      {{- with .Values.frontend.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.frontend.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.frontend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: frontend
+        image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+        imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 8005
+          protocol: TCP
+        env:
+        - name: BACKEND_BASE_URL
+          value: {{ if .Values.frontend.env.BACKEND_BASE_URL }}{{ .Values.frontend.env.BACKEND_BASE_URL | quote }}{{ else }}{{ include "justbenchthatllm.backend.url" . }}{{ end }}
+        {{- range $key, $value := .Values.frontend.env }}
+        {{- if ne $key "BACKEND_BASE_URL" }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.frontend.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.frontend.livenessProbe.httpGet.path }}
+            port: {{ .Values.frontend.livenessProbe.httpGet.port }}
+          initialDelaySeconds: {{ .Values.frontend.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.frontend.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.frontend.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.frontend.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.frontend.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.frontend.readinessProbe.httpGet.path }}
+            port: {{ .Values.frontend.readinessProbe.httpGet.port }}
+          initialDelaySeconds: {{ .Values.frontend.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.frontend.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.frontend.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.frontend.readinessProbe.failureThreshold }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.frontend.resources | nindent 10 }}
+{{- end }}
+

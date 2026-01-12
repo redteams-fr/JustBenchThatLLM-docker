@@ -1,0 +1,341 @@
+# Default values for justbenchthatllm
+# This is a YAML-formatted file.
+
+global:
+  # Global labels applied to all resources
+  labels: {}
+  # Global annotations applied to all resources
+  annotations: {}
+
+# Image pull secret configuration
+pullSecret:
+  # Set to true to create a pull secret
+  create: false
+  # Username for Docker registry
+  username: ""
+  # Password for Docker registry
+  password: ""
+  # Registry URL (default: docker.io)
+  registry: "docker.io"
+
+# Redis configuration
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: 7-alpine
+    pullPolicy: IfNotPresent
+  
+  # Custom labels for Redis pods
+  podLabels: {}
+  # Custom annotations for Redis pods
+  podAnnotations: {}
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 6379
+  
+  # StatefulSet configuration
+  replicaCount: 1
+  
+  # Persistence configuration
+  persistence:
+    enabled: true
+    storageClass: "" # Use default storage class if empty
+    size: 8Gi
+    accessMode: ReadWriteOnce
+  
+  # Resource limits and requests
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  # Health check configuration
+  healthcheck:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    successThreshold: 1
+    failureThreshold: 5
+  
+  # Command override
+  command: ["redis-server"]
+  args: ["--appendonly", "yes"]
+  
+  # Node selector, tolerations, affinity
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# MongoDB configuration
+mongo:
+  enabled: true
+  image:
+    repository: mongo
+    tag: 8.0
+    pullPolicy: IfNotPresent
+  
+  # Custom labels for MongoDB pods
+  podLabels: {}
+  # Custom annotations for MongoDB pods
+  podAnnotations: {}
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 27017
+  
+  # StatefulSet configuration
+  replicaCount: 1
+  
+  # Persistence configuration
+  persistence:
+    enabled: true
+    storageClass: "" # Use default storage class if empty
+    size: 20Gi
+    accessMode: ReadWriteOnce
+  
+  # Resource limits and requests
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+  
+  # Health check configuration
+  healthcheck:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    timeoutSeconds: 3
+    successThreshold: 1
+    failureThreshold: 5
+  
+  # Node selector, tolerations, affinity
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Backend configuration
+backend:
+  enabled: true
+  image:
+    repository: redteamsfr/benchmark-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  # Name of an existing image pull secret
+  pullSecret: ""
+
+  # Custom labels for Backend pods
+  podLabels: {}
+  # Custom annotations for Backend pods
+  podAnnotations: {}
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 8000
+  
+  # Deployment configuration
+  replicaCount: 1
+  
+  # Environment variables
+  env:
+    LOG_LEVEL: INFO
+    STORAGE_TYPE: mongodb
+    MONGODB_DB_NAME: benchmark_db
+  
+  # Resource limits and requests
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  # Health check configuration
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /ready
+      port: 8000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+  
+  # Node selector, tolerations, affinity
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Worker configuration
+worker:
+  enabled: true
+  image:
+    repository: redteamsfr/benchmark-worker
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  # Name of an existing image pull secret
+  pullSecret: ""
+
+  # Custom labels for Worker pods
+  podLabels: {}
+  # Custom annotations for Worker pods
+  podAnnotations: {}
+  
+  # Deployment configuration
+  replicaCount: 1
+  
+  # Environment variables
+  env:
+    LOG_LEVEL: INFO
+    STORAGE_TYPE: mongodb
+    MONGODB_DB_NAME: benchmark_db
+
+  
+  # Resource limits and requests
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  
+  # Health check configuration
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+      port: 8006
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /ready
+      port: 8006
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+  
+  # Node selector, tolerations, affinity
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Frontend configuration
+frontend:
+  enabled: true
+  image:
+    repository: redteamsfr/benchmark-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  # Name of an existing image pull secret
+  pullSecret: ""
+
+  # Custom labels for Frontend pods
+  podLabels: {}
+  # Custom annotations for Frontend pods
+  podAnnotations: {}
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 8005
+  
+  # Deployment configuration
+  replicaCount: 1
+  
+  # Environment variables
+  env:
+    BACKEND_BASE_URL: "" # Will be set automatically if empty
+    APP_PASSWORD: 123456  
+  # Resource limits and requests
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+  
+  # Health check configuration
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /
+      port: 8005
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /
+      port: 8005
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+  
+  # Ingress configuration
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: justbenchthatllm.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+
+
+
+
+    
+  
+  # Node selector, tolerations, affinity
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Pod Security Policy
+podSecurityPolicy:
+  enabled: false
+
+# Network Policy
+networkPolicy:
+  enabled: false
+

@@ -1,0 +1,18 @@
+apiVersion: v2
+name: justbenchthatllm
+description: Benchmark an LLM endpoint without friction - Visual, reproducible benchmarking for LLM inference endpoints
+type: application
+version: 0.1.0
+appVersion: "latest"
+maintainers:
+  - name: Eric RICHARD
+    email: contact@redteams.fr
+keywords:
+  - llm
+  - benchmark
+  - inference
+  - performance
+home: https://github.com/redteamsfr/justbenchthatllm
+sources:
+  - https://github.com/redteamsfr/justbenchthatllm
+
