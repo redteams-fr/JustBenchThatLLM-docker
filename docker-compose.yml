@@ -6,10 +6,13 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    command: ["redis-server", "--appendonly", "yes"]
+    # WARNING: Set REDIS_PASSWORD to a strong value before deployment
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-changeme}"]
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-changeme}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-changeme}", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -21,9 +24,13 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    # WARNING: Set MONGO_USER and MONGO_PASSWORD to strong values before deployment
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-changeme}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "-u", "${MONGO_USER:-admin}", "-p", "${MONGO_PASSWORD:-changeme}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -34,10 +41,10 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - REDIS_URL=redis://redis:6379/0
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-changeme}@redis:6379/0
       - LOG_LEVEL=INFO
       - STORAGE_TYPE=mongodb
-      - MONGODB_URL=mongodb://mongodb:27017
+      - MONGODB_URL=mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-changeme}@mongodb:27017
       - MONGODB_DB_NAME=benchmark_db
     depends_on:
       redis:
@@ -52,9 +59,9 @@ services:
     image: redteamsfr/benchmark-worker:latest
     container_name: benchmark-worker
     environment:
-      - REDIS_URL=redis://redis:6379/0
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-changeme}@redis:6379/0
       - LOG_LEVEL=INFO
-      - MONGODB_URL=mongodb://mongodb:27017
+      - MONGODB_URL=mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-changeme}@mongodb:27017
       - MONGODB_DB_NAME=benchmark_db
       - STORAGE_TYPE=mongodb  
     depends_on:
