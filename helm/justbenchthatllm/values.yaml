@@ -277,7 +277,8 @@ frontend:
   # Environment variables
   env:
     BACKEND_BASE_URL: "" # Will be set automatically if empty
-    APP_PASSWORD: 123456  
+    # APP_PASSWORD is required - set a strong password before deployment
+    APP_PASSWORD: ""  
   # Resource limits and requests
   resources:
     requests:
