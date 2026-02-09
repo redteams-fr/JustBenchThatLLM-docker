@@ -57,7 +57,6 @@ redis:
   
   # Health check configuration
   healthcheck:
-    enabled: true
     initialDelaySeconds: 10
     periodSeconds: 5
     timeoutSeconds: 3
@@ -112,7 +111,6 @@ mongo:
   
   # Health check configuration
   healthcheck:
-    enabled: true
     initialDelaySeconds: 30
     periodSeconds: 5
     timeoutSeconds: 3
@@ -153,7 +151,22 @@ backend:
     LOG_LEVEL: INFO
     STORAGE_TYPE: mongodb
     MONGODB_DB_NAME: benchmark_db
-  
+
+  # CA Bundle configuration for custom certificates
+  caBundle:
+    # Enable CA bundle mounting
+    enabled: false
+    # Inline certificate content (PEM format)
+    # Use this OR existingConfigMap, not both
+    content: ""
+    # Reference to an existing ConfigMap containing the CA bundle
+    # The ConfigMap should have a key matching subPath value
+    existingConfigMap: ""
+    # Mount path inside the container
+    mountPath: /etc/ssl/certs/ca-bundle.pem
+    # Key name in the ConfigMap
+    subPath: ca-bundle.pem
+
   # Resource limits and requests
   resources:
     requests:
@@ -162,10 +175,9 @@ backend:
     limits:
       memory: "512Mi"
       cpu: "500m"
-  
+
   # Health check configuration
   livenessProbe:
-    enabled: true
     httpGet:
       path: /health
       port: 8000
@@ -175,7 +187,6 @@ backend:
     failureThreshold: 3
   
   readinessProbe:
-    enabled: true
     httpGet:
       path: /ready
       port: 8000
@@ -204,15 +215,33 @@ worker:
   podLabels: {}
   # Custom annotations for Worker pods
   podAnnotations: {}
-  
+
   # Deployment configuration
   replicaCount: 1
-  
+
   # Environment variables
   env:
     LOG_LEVEL: INFO
     STORAGE_TYPE: mongodb
     MONGODB_DB_NAME: benchmark_db
+
+  # CA Bundle configuration for custom certificates
+  caBundle:
+    # Enable CA bundle mounting
+    enabled: true
+    # Inline certificate content (PEM format)
+    # Use this OR existingConfigMap, not both
+    content: |
+      -----BEGIN CERTIFICATE-----
+      MIIDxTCCAq2gAwIBAgIQAqxcJmoLQ
+      -----END CERTIFICATE-----
+    # Reference to an existing ConfigMap containing the CA bundle
+    # The ConfigMap should have a key matching subPath value
+    existingConfigMap: ""
+    # Mount path inside the container
+    mountPath: /etc/ssl/certs/ca-bundle.pem
+    # Key name in the ConfigMap
+    subPath: ca-bundle.pem
 
   
   # Resource limits and requests
@@ -226,7 +255,6 @@ worker:
   
   # Health check configuration
   livenessProbe:
-    enabled: true
     httpGet:
       path: /health
       port: 8006
@@ -236,7 +264,6 @@ worker:
     failureThreshold: 3
   
   readinessProbe:
-    enabled: true
     httpGet:
       path: /ready
       port: 8006
@@ -289,7 +316,6 @@ frontend:
   
   # Health check configuration
   livenessProbe:
-    enabled: true
     httpGet:
       path: /
       port: 8005
@@ -299,7 +325,6 @@ frontend:
     failureThreshold: 3
   
   readinessProbe:
-    enabled: true
     httpGet:
       path: /
       port: 8005

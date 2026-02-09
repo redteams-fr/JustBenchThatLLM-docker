@@ -59,7 +59,13 @@ spec:
         - name: {{ $key }}
           value: {{ $value | quote }}
         {{- end }}
-        {{- if .Values.backend.livenessProbe.enabled }}
+        {{- if .Values.backend.caBundle.enabled }}
+        volumeMounts:
+        - name: ca-bundle
+          mountPath: {{ .Values.backend.caBundle.mountPath }}
+          subPath: {{ .Values.backend.caBundle.subPath }}
+          readOnly: true
+        {{- end }}
         livenessProbe:
           httpGet:
             path: {{ .Values.backend.livenessProbe.httpGet.path }}
@@ -68,8 +74,6 @@ spec:
           periodSeconds: {{ .Values.backend.livenessProbe.periodSeconds }}
           timeoutSeconds: {{ .Values.backend.livenessProbe.timeoutSeconds }}
           failureThreshold: {{ .Values.backend.livenessProbe.failureThreshold }}
-        {{- end }}
-        {{- if .Values.backend.readinessProbe.enabled }}
         readinessProbe:
           httpGet:
             path: {{ .Values.backend.readinessProbe.httpGet.path }}
@@ -78,8 +82,13 @@ spec:
           periodSeconds: {{ .Values.backend.readinessProbe.periodSeconds }}
           timeoutSeconds: {{ .Values.backend.readinessProbe.timeoutSeconds }}
           failureThreshold: {{ .Values.backend.readinessProbe.failureThreshold }}
-        {{- end }}
         resources:
           {{- toYaml .Values.backend.resources | nindent 10 }}
+      {{- if .Values.backend.caBundle.enabled }}
+      volumes:
+      - name: ca-bundle
+        configMap:
+          name: {{ .Values.backend.caBundle.existingConfigMap | default (printf "%s-backend-ca" (include "justbenchthatllm.fullname" .)) }}
+      {{- end }}
 {{- end }}
 

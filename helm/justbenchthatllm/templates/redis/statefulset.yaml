@@ -52,7 +52,6 @@ spec:
         - name: redis
           containerPort: 6379
           protocol: TCP
-        {{- if .Values.redis.healthcheck.enabled }}
         livenessProbe:
           exec:
             command:
@@ -73,7 +72,6 @@ spec:
           timeoutSeconds: {{ .Values.redis.healthcheck.timeoutSeconds }}
           successThreshold: {{ .Values.redis.healthcheck.successThreshold }}
           failureThreshold: {{ .Values.redis.healthcheck.failureThreshold }}
-        {{- end }}
         resources:
           {{- toYaml .Values.redis.resources | nindent 10 }}
         volumeMounts:

@@ -59,7 +59,6 @@ spec:
           value: {{ $value | quote }}
         {{- end }}
         {{- end }}
-        {{- if .Values.frontend.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
             path: {{ .Values.frontend.livenessProbe.httpGet.path }}
@@ -68,8 +67,6 @@ spec:
           periodSeconds: {{ .Values.frontend.livenessProbe.periodSeconds }}
           timeoutSeconds: {{ .Values.frontend.livenessProbe.timeoutSeconds }}
           failureThreshold: {{ .Values.frontend.livenessProbe.failureThreshold }}
-        {{- end }}
-        {{- if .Values.frontend.readinessProbe.enabled }}
         readinessProbe:
           httpGet:
             path: {{ .Values.frontend.readinessProbe.httpGet.path }}
@@ -78,7 +75,6 @@ spec:
           periodSeconds: {{ .Values.frontend.readinessProbe.periodSeconds }}
           timeoutSeconds: {{ .Values.frontend.readinessProbe.timeoutSeconds }}
           failureThreshold: {{ .Values.frontend.readinessProbe.failureThreshold }}
-        {{- end }}
         resources:
           {{- toYaml .Values.frontend.resources | nindent 10 }}
 {{- end }}

@@ -1,0 +1,15 @@
+{{- if and .Values.backend.enabled .Values.backend.caBundle.enabled .Values.backend.caBundle.content }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "justbenchthatllm.fullname" . }}-backend-ca
+  labels:
+    {{- include "justbenchthatllm.backend.labels" . | nindent 4 }}
+  {{- if or .Values.global.annotations .Values.backend.podAnnotations }}
+  annotations:
+    {{- include "justbenchthatllm.backend.annotations" . | nindent 4 }}
+  {{- end }}
+data:
+  {{ .Values.backend.caBundle.subPath }}: |
+    {{- .Values.backend.caBundle.content | nindent 4 }}
+{{- end }}

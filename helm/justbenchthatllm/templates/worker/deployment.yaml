@@ -55,15 +55,36 @@ spec:
         - name: {{ $key }}
           value: {{ $value | quote }}
         {{- end }}
-        {{- if .Values.worker.livenessProbe.enabled }}
+        {{- if .Values.worker.caBundle.enabled }}
+        volumeMounts:
+        - name: ca-bundle
+          mountPath: {{ .Values.worker.caBundle.mountPath }}
+          subPath: {{ .Values.worker.caBundle.subPath }}
+          readOnly: true
+        {{- end }}
         livenessProbe:
-          {{- toYaml .Values.worker.livenessProbe | nindent 10 }}
-        {{- end }}
-        {{- if .Values.worker.readinessProbe.enabled }}
+          httpGet:
+            path: {{ .Values.worker.livenessProbe.httpGet.path }}
+            port: {{ .Values.worker.livenessProbe.httpGet.port }}
+          initialDelaySeconds: {{ .Values.worker.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.worker.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.worker.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.worker.livenessProbe.failureThreshold }}
         readinessProbe:
-          {{- toYaml .Values.worker.readinessProbe | nindent 10 }}
-        {{- end }}
+          httpGet:
+            path: {{ .Values.worker.readinessProbe.httpGet.path }}
+            port: {{ .Values.worker.readinessProbe.httpGet.port }}
+          initialDelaySeconds: {{ .Values.worker.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.worker.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.worker.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.worker.readinessProbe.failureThreshold }}
         resources:
           {{- toYaml .Values.worker.resources | nindent 10 }}
+      {{- if .Values.worker.caBundle.enabled }}
+      volumes:
+      - name: ca-bundle
+        configMap:
+          name: {{ .Values.worker.caBundle.existingConfigMap | default (printf "%s-worker-ca" (include "justbenchthatllm.fullname" .)) }}
+      {{- end }}
 {{- end }}
 

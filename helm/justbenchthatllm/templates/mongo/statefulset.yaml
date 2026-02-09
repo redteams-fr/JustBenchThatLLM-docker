@@ -51,7 +51,6 @@ spec:
         - name: mongo
           containerPort: 27017
           protocol: TCP
-        {{- if .Values.mongo.healthcheck.enabled }}
         livenessProbe:
           exec:
             command:
@@ -74,7 +73,6 @@ spec:
           timeoutSeconds: {{ .Values.mongo.healthcheck.timeoutSeconds }}
           successThreshold: {{ .Values.mongo.healthcheck.successThreshold }}
           failureThreshold: {{ .Values.mongo.healthcheck.failureThreshold }}
-        {{- end }}
         resources:
           {{- toYaml .Values.mongo.resources | nindent 10 }}
         volumeMounts:
